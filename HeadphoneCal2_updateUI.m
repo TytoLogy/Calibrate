@@ -3,12 +3,16 @@
 
 %------------------------------------------------------------------------
 %  Go Ashida & Sharad Shanbhag
-%   ashida@umd.edu
-%	sharad.shanbhag@einstein.yu.edu
+%  ashida@umd.edu
+%	sshanbhag@neomed.edu
 %------------------------------------------------------------------------
 % Original Version Written (HeadphoneCal): 2008-2010 by SJS
 % Upgraded Version Written (HeadphoneCal2_updateUI): 2011-2012 by GA
 %------------------------------------------------------------------------
+%
+% 26 Apr 2016 (SJS): reworking for optogen project
+% 	- adding toggle to use or not use FR file
+%--------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % update the UI values
@@ -16,6 +20,21 @@
 % microphone settings
 update_ui_str(handles.editGainL, handles.h2.cal.MicGainL_dB);
 update_ui_str(handles.editGainR, handles.h2.cal.MicGainR_dB);
+
+% enable ctrls if UseFR checkbox is selected
+UseFR_enable_list = [	handles.buttonLoadFRL handles.buttonLoadFRR ...
+								handles.textFRFileL	handles.textFRFileR	...
+								handles.textFRL	handles.textFRR	];
+UseFR_disable_list = [	handles.textSensitivity	...
+								handles.textSenseL	handles.textSenseR	...
+								handles.editSenseL	handles.editSenseR	];
+if handles.h2.cal.UseFR
+	enable_ui(UseFR_enable_list);
+	disable_ui(UseFR_disable_list);
+else
+	disable_ui(UseFR_enable_list);
+	enable_ui(UseFR_disable_list);
+end
 
 % calibration settings
 update_ui_str(handles.editFmin, handles.h2.cal.Fmin);

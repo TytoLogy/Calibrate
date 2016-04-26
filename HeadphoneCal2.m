@@ -1,24 +1,30 @@
 function varargout = HeadphoneCal2(varargin)
 %HEADPHONECAL2 M-file for HeadphoneCal2.fig
-%   HEADPHONECAL2, by itself, creates a new HEADPHONECAL2 or raises the existing singleton*.
+%   HEADPHONECAL2, by itself, creates a new HEADPHONECAL2 or raises the
+%   existing singleton*.
 %
-%   H = HEADPHONECAL2 returns the handle to a new HEADPHONECAL2 or the handle to
+%   H = HEADPHONECAL2 returns the handle to a new HEADPHONECAL2 or the
+%   handle to
 %      the existing singleton*.
 
-% Last Modified by GUIDE v2.5 09-May-2012 12:50:37
+% Last Modified by GUIDE v2.5 26-Apr-2016 18:35:41
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag & Go Ashida
-%   sharad.shanbhag@einstein.yu.edu
+%   sshanbhag@neomed.edu
 %   ashida@umd.edu
 %------------------------------------------------------------------------
-% Original Version Written (MicrophoneCal): 2009-2011 by SJS
-% Upgraded Version Written (MicrophoneCal2): 2011-2012 by GA
+% Original Version Written (HeadphoneCal): 2009-2011 by SJS
+% Upgraded Version Written (HeadphoneCal2): 2011-2012 by GA
 %--------------------------------------------------------------------------
 % ** Important Notes ** (Nov 2011, GA)
-%   Parameters used in HeadphoneCal2 are stored under the handles.h2 structure,
-%   while parameters used in HeadphoneCal are stored directly under handles. 
+%   Parameters used in HeadphoneCal2 are stored under the handles.h2
+%   structure, while parameters used in HeadphoneCal are stored directly
+%   under handles.
 %
+% 26 Apr 2016 (SJS): reworking for optogen project
+% 	- adding toggle to use or not use FR file
+%--------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialization code automatically created by the Matlab GUIDE function 
@@ -56,7 +62,7 @@ function HeadphoneCal2_OpeningFcn(hObject, eventdata, handles, varargin)
     % initialize handles.h2 structure
     handles.h2 = struct();
     % setting defaults
-    handles.h2.defaults = HeadphoneCal2_init('INIT');
+    handles.h2.defaults = HeadphoneCal2_init('INIT_ULTRA');
     % setting current cal settings
     handles.h2.cal = handles.h2.defaults;
     % default hardware is 'No_TDT' 
@@ -85,8 +91,12 @@ function varargout = HeadphoneCal2_OutputFcn(hObject, eventdata, handles)
 % --- Cleaning up before closing 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
-function CloseRequestFcn(hObject, eventdata, handles)
-    pause(0.1);
+function HeadphoneCal2_CloseRequestFcn(hObject, eventdata, handles)
+   pause(0.1);
+	delete(hObject);
+% --- Executes during object deletion, before destroying properties.
+function HeadphoneCal2_DeleteFcn(hObject, eventdata, handles)
+   pause(0.1);
 	delete(hObject);
 %--------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -112,40 +122,40 @@ function popupTDT_Callback(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function buttonSaveSettings_Callback(hObject, eventdata, handles)
-    % get file name
-	[fname, fpath] = ...
-        uiputfile('*_HPCal2settings.mat', 'Save HeadphoneCal2 settings file...');
+	% get file name
+	[fname, fpath] = uiputfile('*_HPCal2settings.mat', ...
+										'Save HeadphoneCal2 settings file...');
 	if fname == 0 % return if user hits CANCEL button
 		str = 'saving cancelled...';
-        set(handles.textMessage, 'String', str);
+		set(handles.textMessage, 'String', str);
 		return;
-    end
-    % display message
-    str = ['Saving settings to ' fname]; 
-    set(handles.textMessage, 'String', str);
+	end
+	% display message
+	str = ['Saving settings to ' fname]; 
+	set(handles.textMessage, 'String', str);
 	% save cal data
-    cal = handles.h2.cal; 
+	cal = handles.h2.cal;  %#ok<*NASGU>
 	save(fullfile(fpath, fname), '-MAT', 'cal');
 %--------------------------------------------------------------------------
 function buttonLoadSettings_Callback(hObject, eventdata, handles)
     % get file name
-	[fname, fpath] = ...
-        uigetfile('*_HPCal2settings.mat', 'Load HeadphoneCal2 settings file...');
+	[fname, fpath] = uigetfile('*_HPCal2settings.mat', ...
+										'Load HeadphoneCal2 settings file...');
 	if fname == 0 % return if user hits CANCEL button
 		str = 'loading cancelled...';
-        set(handles.textMessage, 'String', str);
+		set(handles.textMessage, 'String', str);
 		return;
-    end
-    % display message
-    str = ['Loading settings from ' fname]; 
-    set(handles.textMessage, 'String', str);
+	end
+	% display message
+	str = ['Loading settings from ' fname]; 
+	set(handles.textMessage, 'String', str);
 	% load cal data
 	load(fullfile(fpath, fname), 'cal');
 	handles.h2.cal = cal;
 	handles.h2.COMPLETE = 0; % calibration with these settings is incomplete
 	guidata(hObject, handles); % save handles structure 
-    % updating the GUI
-    HeadphoneCal2_updateUI; 
+	% updating the GUI
+	HeadphoneCal2_updateUI; 
 %--------------------------------------------------------------------------
 function buttonDefaultSettings_Callback(hObject, eventdata, handles)
     % display message
@@ -162,48 +172,59 @@ function buttonDefaultSettings_Callback(hObject, eventdata, handles)
 % FR Load button callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
+function UseFR_Callback(hObject, eventdata, handles)
+	% get status of UseFR checkbox, store in h2.cal.UseFR
+	handles.h2.cal.UseFR = read_ui_val(handles.UseFR);
+	% display message
+	str = sprintf('handles.h2.cal.UseFR = %d', handles.h2.cal.UseFR);
+	update_ui_str(handles.textMessage, str);
+	% save handles
+	guidata(hObject, handles);
+	% update UI
+	HeadphoneCal2_updateUI;
+%--------------------------------------------------------------------------
 function buttonLoadFRL_Callback(hObject, eventdata, handles)
-    % get file name
-	[fname, fpath] = ...
-        uigetfile('*_fr2.mat', 'Load FR data for LEFT microphone...');
+	% get file name
+	[fname, fpath] = uigetfile('*_fr2.mat', ...
+										'Load FR data for LEFT microphone...');
 	if fname == 0 % return if user hits CANCEL button
 		str = 'loading cancelled...';
-        set(handles.textMessage, 'String', str);
+		set(handles.textMessage, 'String', str);
 		return;
-    end
-    % display message
-    str = ['Loading LEFT microphone calibration data from ' fname];
-    set(handles.textMessage, 'String', str);
+	end
+	% display message
+	str = ['Loading LEFT microphone calibration data from ' fname];
+	set(handles.textMessage, 'String', str);
 	% load FR data
-    handles.h2.fr.frfileL = fullfile(fpath, fname);
+	handles.h2.fr.frfileL = fullfile(fpath, fname);
 	load(handles.h2.fr.frfileL, 'frdata');
-    handles.h2.fr.frdataL = frdata;
-    handles.h2.fr.loadedL = 1;
+	handles.h2.fr.frdataL = frdata;
+	handles.h2.fr.loadedL = 1;
 	handles.h2.COMPLETE = 0; % calibration with these settings is incomplete
-    guidata(hObject, handles); % save handles structure
-    % show the file name
+	guidata(hObject, handles); % save handles structure
+	% show the file name
 	update_ui_str(handles.textFRL, handles.h2.fr.frfileL);
 %--------------------------------------------------------------------------
 function buttonLoadFRR_Callback(hObject, eventdata, handles)
-    % get file name
-	[fname, fpath] = ...
-        uigetfile('*_fr2.mat', 'Load FR data for RIGHT microphone...');
+	% get file name
+	[fname, fpath] = uigetfile('*_fr2.mat', ...
+										'Load FR data for RIGHT microphone...');
 	if fname == 0 % return if user hits CANCEL button
 		str = 'loading cancelled...';
-        set(handles.textMessage, 'String', str);
+		set(handles.textMessage, 'String', str);
 		return;
-    end
-    % display message
-    str = ['Loading RIGHT microphone calibration data from ' fname];
-    set(handles.textMessage, 'String', str);
+	end
+	% display message
+	str = ['Loading RIGHT microphone calibration data from ' fname];
+	set(handles.textMessage, 'String', str);
 	% load FR data
-    handles.h2.fr.frfileR = fullfile(fpath, fname);
+	handles.h2.fr.frfileR = fullfile(fpath, fname);
 	load(handles.h2.fr.frfileR, 'frdata');
-    handles.h2.fr.frdataR = frdata;
-    handles.h2.fr.loadedR = 1;
+	handles.h2.fr.frdataR = frdata;
+	handles.h2.fr.loadedR = 1;
 	handles.h2.COMPLETE = 0; % calibration with these settings is incomplete
-    guidata(hObject, handles); % save handles structure
-    % show the file name
+	guidata(hObject, handles); % save handles structure
+	% show the file name
 	update_ui_str(handles.textFRR, handles.h2.fr.frfileR);
 %--------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -211,30 +232,30 @@ function buttonLoadFRR_Callback(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function buttonCalibrate_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Starting Calibration'; 
-    set(handles.textMessage, 'String', str);
-    % updating buttons 
-    disable_ui(handles.buttonCalibrate);
-    enable_ui(handles.buttonAbort);
-    update_ui_val(handles.buttonAbort, 0);
-    % resetting COMPLETE flag
-    handles.h2.COMPLETE = 0;
-    % resetting ABORT flag
-    handles.h2.ABORT = 0;
-    % save handles structure
-    guidata(hObject, handles);
-    % go to main part
-    HeadphoneCal2_Run;
-    % updating buttons 
-    enable_ui(handles.buttonCalibrate);
-    disable_ui(handles.buttonAbort);
-    update_ui_val(handles.buttonAbort, 0); 
-    % if completed then plot data
-    if handles.h2.COMPLETE
-        HeadphoneCal2_plot(handles.h2.caldata);
-    end
-    % save handles structure
+	% display message
+	str = 'Starting Calibration'; 
+	set(handles.textMessage, 'String', str);
+	% updating buttons 
+	disable_ui(handles.buttonCalibrate);
+	enable_ui(handles.buttonAbort);
+	update_ui_val(handles.buttonAbort, 0);
+	% resetting COMPLETE flag
+	handles.h2.COMPLETE = 0;
+	% resetting ABORT flag
+	handles.h2.ABORT = 0;
+	% save handles structure
+	guidata(hObject, handles);
+	% go to main part
+	HeadphoneCal2_Run;
+	% updating buttons 
+	enable_ui(handles.buttonCalibrate);
+	disable_ui(handles.buttonAbort);
+	update_ui_val(handles.buttonAbort, 0); 
+	% if completed then plot data
+	if handles.h2.COMPLETE
+		HeadphoneCal2_plot(handles.h2.caldata);
+	end
+	% save handles structure
 	guidata(hObject, handles);
 %--------------------------------------------------------------------------
 function buttonAbort_Callback(hObject, eventdata, handles)
@@ -362,87 +383,111 @@ function editInChanR_Callback(hObject, eventdata, handles)
 % editboxes for microphone settings 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
+function editSenseL_Callback(hObject, eventdata, handles)
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
+	if checklim(tmp, [0.001 10]) 
+		handles.h2.cal.MicSenseL = tmp;
+		guidata(hObject, handles);
+	else % resetting to old value
+		update_ui_str(hObject, handles.h2.cal.MicSenseL);
+	end
+	% display message
+	update_ui_str(handles.textMessage, 'Sensitivity L changed');
+%--------------------------------------------------------------------------
+function editSenseR_Callback(hObject, eventdata, handles)
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
+	if checklim(tmp, [0.001 10]) 
+		handles.h2.cal.MicSenseR = tmp;
+		guidata(hObject, handles);
+	else % resetting to old value
+		update_ui_str(hObject, handles.h2.cal.MicSenseR);
+	end
+	% display message
+	update_ui_str(handles.textMessage, 'Sensitivity R changed');
+%--------------------------------------------------------------------------
 function editGainL_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Gain L changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Gain L changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [0 120]) 
 		handles.h2.cal.MicGainL_dB = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.MicGainL_dB);
-    end
+	end
 %--------------------------------------------------------------------------
 function editGainR_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Gain R changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Gain R changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [0 120]) 
 		handles.h2.cal.MicGainR_dB = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.MicGainR_dB);
-    end
+	end
 %--------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % editboxes/radiobuttons/checkbox for calibration settings   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function editFmin_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Fmin changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Fmin changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [0, handles.h2.cal.Fmax]) 
 		handles.h2.cal.Fmin = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.Fmin);
-    end
+	end
 %--------------------------------------------------------------------------
 function editFmax_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Fmax changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Fmax changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [handles.h2.cal.Fmin, 20000]) 
 		handles.h2.cal.Fmax = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.Fmax);
-    end
+	end
 %--------------------------------------------------------------------------
 function editFstep_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Fstep changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Fstep changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [1, 20000]) 
 		handles.h2.cal.Fstep = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.Fstep);
-    end
+	end
 %--------------------------------------------------------------------------
 function editReps_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Reps changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Reps changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [1, 100]) 
 		handles.h2.cal.Reps = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.Reps);
-    end
+	end
 %--------------------------------------------------------------------------
 function radioSide_SelectionChangeFcn(hObject, eventdata, handles)
     % check selected val 
@@ -477,56 +522,56 @@ function radioSide_SelectionChangeFcn(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function editMinLevel_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Min Level changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Min Level changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [0, handles.h2.cal.MaxLevel-1]) 
 		handles.h2.cal.MinLevel = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.MinLevel);
-    end
+	end
 %--------------------------------------------------------------------------
 function editMaxLevel_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Max Level changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Max Level changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [handles.h2.cal.MinLevel+1 100])	
 		handles.h2.cal.MaxLevel = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.MaxLevel);
-    end
+	end
 %--------------------------------------------------------------------------
 function editAttenStep_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Atten Step changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Atten Step changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [1 handles.h2.cal.MaxLevel-handles.h2.cal.MinLevel]) 
 		handles.h2.cal.AttenStep = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.AttenStep);
-    end
+	end
 %--------------------------------------------------------------------------
 function editAttenFixed_Callback(hObject, eventdata, handles)
-    % display message
-    str = 'Atten changed';
-    set(handles.textMessage, 'String', str);
-    % check limits
-    tmp = read_ui_str(hObject, 'n');
+	% display message
+	str = 'Atten changed';
+	set(handles.textMessage, 'String', str);
+	% check limits
+	tmp = read_ui_str(hObject, 'n');
 	if checklim(tmp, [0 120]) 
 		handles.h2.cal.AttenFixed = tmp;
-        guidata(hObject, handles);
-    else % resetting to old value
+		guidata(hObject, handles);
+	else % resetting to old value
 		update_ui_str(hObject, handles.h2.cal.AttenFixed);
-    end
+	end
 %--------------------------------------------------------------------------
 function radioAtten_SelectionChangeFcn(hObject, eventdata, handles)
     % check selected val 
@@ -760,12 +805,24 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
+function editSenseL_CreateFcn(hObject, eventdata, handles)
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
+function editSenseR_CreateFcn(hObject, eventdata, handles)
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editGainL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+		get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 function editGainR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+if ispc && isequal(get(hObject,'BackgroundColor'), ...
+		get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
@@ -866,4 +923,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
+
+
 
