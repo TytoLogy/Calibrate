@@ -4,17 +4,20 @@ function out = HeadphoneCal2_dummyFR(varargin)
 %------------------------------------------------------------------------
 % 
 % Sets FR data for unused side
-%
+% 				- OR -
+% for use when calibration mic is used directly
 %------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
-%  Go Ashida 
-%   ashida@umd.edu
+% Go Ashida
+% ashida@umd.edu
+% Sharad Shanbhag
+% sshanbhag@neomed.edu
 %------------------------------------------------------------------------
 % Created: November, 2011 by GA
 %
 % Revisions: 
-% 
+%	29 Apr 2016 (SJS): updated email addresses
 %------------------------------------------------------------------------
 
 out.version = '2.0';

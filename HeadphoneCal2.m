@@ -74,7 +74,7 @@ function HeadphoneCal2_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.h2.COMPLETE = 0;
     % resetting ABORT flag
     handles.h2.ABORT = 0;
-    % save handles struture		
+    % save handles structure
     guidata(hObject, handles);
     % updating the GUI
     HeadphoneCal2_updateUI
@@ -104,27 +104,29 @@ function HeadphoneCal2_DeleteFcn(hObject, eventdata, handles)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function popupTDT_Callback(hObject, eventdata, handles)
-    % reading out selected hardware
-    tdtStrings = read_ui_str(hObject);  % list of strings
-    selectedVal = read_ui_val(hObject); % selected item number
-    selectedStr = upper(tdtStrings{selectedVal}); % selected item
-    % display message
-    str = [ selectedStr ' selected' ];
-    set(handles.textMessage, 'String', str);
-    % update handles.h2.config according to the selection of TDT
-    handles.h2.config = HeadphoneCal2_init(selectedStr);
+	% reading out selected hardware
+	tdtStrings = read_ui_str(hObject);  % list of strings
+	selectedVal = read_ui_val(hObject); % selected item number
+	selectedStr = upper(tdtStrings{selectedVal}); % selected item
+	% display message
+	str = [ selectedStr ' selected' ];
+	set(handles.textMessage, 'String', str);
+	% update handles.h2.config according to the selection of TDT
+	handles.h2.config = HeadphoneCal2_init(selectedStr);
 	guidata(hObject, handles); 
-    % updating the GUI
-    HeadphoneCal2_updateUI
+	% updating the GUI
+	HeadphoneCal2_updateUI
 %--------------------------------------------------------------------------
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Save/Load Settings button callbacks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function buttonSaveSettings_Callback(hObject, eventdata, handles)
-	% get file name
-	[fname, fpath] = uiputfile('*_HPCal2settings.mat', ...
-										'Save HeadphoneCal2 settings file...');
+	% get settingsfile name
+	[fname, fpath] =	uiputfile(	...
+								'*_HeadphoneCal2Settings.mat', ...
+								'Save HeadphoneCal2 settings file...' ...
+							);
 	if fname == 0 % return if user hits CANCEL button
 		str = 'saving cancelled...';
 		set(handles.textMessage, 'String', str);
@@ -133,14 +135,19 @@ function buttonSaveSettings_Callback(hObject, eventdata, handles)
 	% display message
 	str = ['Saving settings to ' fname]; 
 	set(handles.textMessage, 'String', str);
-	% save cal data
-	cal = handles.h2.cal;  %#ok<*NASGU>
-	save(fullfile(fpath, fname), '-MAT', 'cal');
+	% save settings data
+	settings.cal = handles.h2.cal;  %#ok<*NASGU>
+	% save hardware value
+	settings.hwVal = read_ui_val(handles.popupTDT);
+	% write settings to file
+	save(fullfile(fpath, fname), '-MAT', 'settings');
 %--------------------------------------------------------------------------
 function buttonLoadSettings_Callback(hObject, eventdata, handles)
     % get file name
-	[fname, fpath] = uigetfile('*_HPCal2settings.mat', ...
-										'Load HeadphoneCal2 settings file...');
+	[fname, fpath] =	uigetfile(	...
+								sprintf('*_%sSettings.mat', mfilename), ...
+								sprintf('Load %s settings file...', mfilename) ...
+							);
 	if fname == 0 % return if user hits CANCEL button
 		str = 'loading cancelled...';
 		set(handles.textMessage, 'String', str);
@@ -149,11 +156,22 @@ function buttonLoadSettings_Callback(hObject, eventdata, handles)
 	% display message
 	str = ['Loading settings from ' fname]; 
 	set(handles.textMessage, 'String', str);
-	% load cal data
-	load(fullfile(fpath, fname), 'cal');
-	handles.h2.cal = cal;
-	handles.h2.COMPLETE = 0; % calibration with these settings is incomplete
-	guidata(hObject, handles); % save handles structure 
+	% load data
+	load(fullfile(fpath, fname), 'settings');
+	% assign elements to handles
+	handles.h2.cal = settings.cal;
+	% calibration with these settings is incomplete
+	handles.h2.COMPLETE = 0;
+	% update the popUp hardware settings
+	update_ui_val(handles.popupTDT, settings.hwVal);
+	% get selected hardware
+	tdtStrings = read_ui_str(handles.popupTDT);  % list of strings
+	selectedVal = read_ui_val(handles.popupTDT); % selected item number
+	selectedStr = upper(tdtStrings{selectedVal}); % selected item
+	% update handles.h2.config according to the selection of TDT
+	handles.h2.config = HeadphoneCal2_init(selectedStr);
+	% save handles structure 
+	guidata(hObject, handles);
 	% updating the GUI
 	HeadphoneCal2_updateUI; 
 %--------------------------------------------------------------------------
@@ -163,8 +181,10 @@ function buttonDefaultSettings_Callback(hObject, eventdata, handles)
     set(handles.textMessage, 'String', str);
     % load the default settings
     handles.h2.cal = handles.h2.defaults;
-    handles.h2.COMPLETE = 0; % calibration with these settings is incomplete
-    guidata(hObject, handles); % save handles structure 
+    % calibration with these settings is incomplete
+	 handles.h2.COMPLETE = 0;
+	 % save handles structure 
+    guidata(hObject, handles);
     % updating the GUI
     HeadphoneCal2_updateUI;
 %--------------------------------------------------------------------------
@@ -456,7 +476,7 @@ function editFmax_Callback(hObject, eventdata, handles)
 	set(handles.textMessage, 'String', str);
 	% check limits
 	tmp = read_ui_str(hObject, 'n');
-	if checklim(tmp, [handles.h2.cal.Fmin, 20000]) 
+	if checklim(tmp, [handles.h2.cal.Fmin, 98000]) 
 		handles.h2.cal.Fmax = tmp;
 		guidata(hObject, handles);
 	else % resetting to old value

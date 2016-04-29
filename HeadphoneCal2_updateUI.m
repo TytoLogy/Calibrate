@@ -28,6 +28,7 @@ UseFR_enable_list = [	handles.buttonLoadFRL handles.buttonLoadFRR ...
 UseFR_disable_list = [	handles.textSensitivity	...
 								handles.textSenseL	handles.textSenseR	...
 								handles.editSenseL	handles.editSenseR	];
+update_ui_val(handles.UseFR, handles.h2.cal.UseFR);
 if handles.h2.cal.UseFR
 	enable_ui(UseFR_enable_list);
 	disable_ui(UseFR_disable_list);
@@ -89,10 +90,14 @@ update_ui_str(handles.editHPFreq, handles.h2.cal.HPFreq);
 update_ui_str(handles.editLPFreq, handles.h2.cal.LPFreq);
 
 % channel settings
+try
 update_ui_str(handles.editOutChanL, handles.h2.config.OutChanL);
 update_ui_str(handles.editOutChanR, handles.h2.config.OutChanR);
 update_ui_str(handles.editInChanL, handles.h2.config.InChanL);
 update_ui_str(handles.editInChanR, handles.h2.config.InChanR);
+catch
+	keyboard
+end
 
 % save raw data checkbox
 if handles.h2.cal.SaveRawData

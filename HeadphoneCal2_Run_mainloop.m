@@ -42,73 +42,86 @@ plot(tvec, stimvecS, Scolor);
 % figure out the attenuation values
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 switch cal.AttenType
-    case 'VARIED' % go to loop below to fing the proper attenuation value
-        RETRY = 1;
+	case 'VARIED' % go to loop below to fing the proper attenuation value
+		RETRY = 1;
 
-    case 'FIXED'
-    % no need to test attenuation but do need to set the attenuators
-        config.setattenFunc(PA5P, Patten);    
-        config.setattenFunc(PA5S, Satten);    
-        update_ui_str(editAttenP, Patten);
-        update_ui_str(editAttenS, Satten);
-        RETRY = 0;
+	case 'FIXED'
+		if strcmpi(config.AttenMode, 'PA5')
+			% no need to test attenuation but do need to set the attenuators
+			config.setattenFunc([PA5P PA5S], atten_val);
+		elseif strcmpi(config.AttenMode, 'RZ6')
+			config.setattenFunc(iodev, atten_val);
+		elseif strcmpi(config.AttenMode, 'DIGITAL')
+			% do something
+		end
+		update_ui_str(editAttenP, Patten);
+		update_ui_str(editAttenS, Satten);
+		RETRY = 0;
 end
 
 %loop while figuring out the attenuator value.
 while RETRY 
-    % show info to user
-    update_ui_str(handles.editRepVal, 'setting PA5');
-    % set the attenuators
-    config.setattenFunc(PA5P, Patten);
-    config.setattenFunc(PA5S, Satten);
-    update_ui_str(editAttenP, Patten);
-    update_ui_str(editAttenS, Satten);
-    % play the sound;
-    [resp, rate] = config.ioFunc(iodev, S, acqpts);
-    % plot the response
-    axes(axesRespP);
-    plot(tvec, resp{PLAYED}, Pcolor);
-    axes(axesRespS);
-    plot(tvec, resp{SILENT}, Scolor);
-    % determine the magnitude and phase of the response
-    [pmag, pphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, freq);
-    % adjust for the gain of the preamp and apply correction factors for RMS and microphone calibration
-    pmag = cal.RMSsin * pmag / (cal.MicGain(PLAYED) * pmagadjval(freq_index));
-    % compute dB SPL
-    pmagdB = dbspl(cal.VtoPa(PLAYED) * pmag);
-    % show values
-    update_ui_str(editValP, sprintf('%.4f', 1000*pmag));
-    update_ui_str(editSPLP, sprintf('%.2f', pmagdB));
+	% show info to user
+	update_ui_str(handles.editRepVal, 'setting PA5');
+	% set the attenuators
+	if strcmpi(config.AttenMode, 'PA5')
+		config.setattenFunc([PA5P PA5S], atten_val);
+	elseif strcmpi(config.AttenMode, 'RZ6')
+		config.setattenFunc(iodev, atten_val);
+	elseif strcmpi(config.AttenMode, 'DIGITAL')
+		% do something to stim
+	end
+	update_ui_str(editAttenP, Patten);
+	update_ui_str(editAttenS, Satten);
+	% play the sound;
+	[resp, rate] = config.ioFunc(iodev, S, acqpts);
+	% filter raw data
+	resp{PLAYED} = filtfilt(fcoeffb, fcoeffa, sin2array(resp{PLAYED}, 1, iodev.Fs));
+	resp{SILENT} = filtfilt(fcoeffb, fcoeffa, sin2array(resp{SILENT}, 1, iodev.Fs));
+	% plot the response
+	plot(axesRespP, tvec, resp{PLAYED}, Pcolor);
+	plot(axesRespS, tvec, resp{SILENT}, Scolor);
+	% determine the magnitude and phase of the response
+	[pmag, pphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, freq);
+	% adjust for the gain of the preamp and apply correction factors for RMS and microphone calibration
+	pmag = cal.RMSsin * pmag / (cal.MicGain(PLAYED) * pmagadjval(freq_index));
+	% compute dB SPL
+	pmagdB = dbspl(cal.VtoPa(PLAYED) * pmag);
+	% show values
+	update_ui_str(editValP, sprintf('%.4f', 1000*pmag));
+	update_ui_str(editSPLP, sprintf('%.2f', pmagdB));
 
-    % check to see if the channel amplitude is in bounds
-    if pmagdB > cal.MaxLevel % if sound too loud
-        Patten = Patten + cal.AttenStep; % then increase attenuation
-        if Patten > MAX_ATTEN  % if at limit, set max attenuation
-            Patten = MAX_ATTEN;
-            str = 'Attenuation maxed out!';
-            set(handles.textMessage, 'String', str);
-            RETRY = 0;
-            STOPFLAG = -1;
-        end
-    elseif pmagdB < cal.MinLevel % if sound too faint
-        Patten = Patten - cal.AttenStep; % then decrease attenuation
-        if Patten <= 0
-            Patten = 0;
-            str = 'Attenuator at minimum level!';
-            set(handles.textMessage, 'String', str);
-            RETRY = 0;
-            STOPFLAG = -2;
-        end
-    else % sound level is in the range
-        RETRY = 0;
-    end
- 
-    % check if user pressed ABORT button 
-    if read_ui_val(handles.buttonAbort) == 1
-        str = 'ABORT button pressed';
-        break;
-    end
-    
+	% check to see if the channel amplitude is in bounds
+	if pmagdB > cal.MaxLevel % if sound too loud
+		Patten = Patten + cal.AttenStep; % then increase attenuation
+		if Patten > MAX_ATTEN  % if at limit, set max attenuation
+			Patten = MAX_ATTEN;
+			atten_val(PLAYED) = Patten; 
+			str = 'Attenuation maxed out!';
+			set(handles.textMessage, 'String', str);
+			RETRY = 0;
+			STOPFLAG = -1;
+		end
+	elseif pmagdB < cal.MinLevel % if sound too faint
+		Patten = Patten - cal.AttenStep; % then decrease attenuation
+		if Patten <= 0
+			Patten = 0;
+			atten_val(PLAYED) = Patten; 
+			str = 'Attenuator at minimum level!';
+			set(handles.textMessage, 'String', str);
+			RETRY = 0;
+			STOPFLAG = -2;
+		end
+	else % sound level is in the range
+		RETRY = 0;
+	end
+
+	% check if user pressed ABORT button 
+	if read_ui_val(handles.buttonAbort) == 1
+	str = 'ABORT button pressed';
+	break;
+	end
+
 end % of RETRY loop
 
 % store the attenuator setting to copute max attainable SPL at this freq
@@ -126,19 +139,20 @@ for rep = 1:cal.Reps
     % show rep number to user
     update_ui_str(handles.editRepVal, [ num2str(rep) ' / ' num2str(cal.Reps) ]);
     % play the sound;
-    [resp, rate] = config.ioFunc(iodev, S, acqpts); 
+    [resp, rate] = config.ioFunc(iodev, S, acqpts);
+	% filter raw data
+	resp{PLAYED} = filtfilt(fcoeffb, fcoeffa, sin2array(resp{PLAYED}, 1, iodev.Fs));
+	resp{SILENT} = filtfilt(fcoeffb, fcoeffa, sin2array(resp{SILENT}, 1, iodev.Fs));
     % plot the response
-    axes(axesRespP);
-    plot(tvec, resp{PLAYED}, Pcolor);
-    axes(axesRespS);
-    plot(tvec, resp{SILENT}, Scolor);
+    plot(axesRespP,tvec, resp{PLAYED}, Pcolor);
+    plot(axesRespS, tvec, resp{SILENT}, Scolor);
     % determine the magnitude and phase of the response/leak
     [pmag, pphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, freq);
     [smag, sphi] = fitsinvec(resp{SILENT}(start_bin:end_bin), 1, iodev.Fs, freq);
     [pdistmag, pdistphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, 2*freq);    
     [sdistmag, sdistphi] = fitsinvec(resp{SILENT}(start_bin:end_bin), 1, iodev.Fs, 2*freq);                
     % compute 2nd harmonic distortion ratio
-    tmpdists{PLAYED}(freq_index, rep) = pdistmag / pmag;
+    tmpdists{PLAYED}(freq_index, rep) = pdistmag / pmag; %#ok<*SAGROW>
     tmpleakdists{SILENT}(freq_index, rep) = sdistmag / smag;
     tmpdistphis{PLAYED}(freq_index, rep) = pdistphi - pphiadjval(freq_index);
     tmpleakdistphis{SILENT}(freq_index, rep) = sdistphi - sphiadjval(freq_index);

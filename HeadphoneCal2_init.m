@@ -164,20 +164,23 @@ switch upper(stype)
 		out.InChanR = 2;
 
 		out.Circuit_Path = 'C:\TytoLogy\Toolboxes\TDTToolbox\Circuits\RZ6';
-		out.Circuit_Name = 'RZ6_2ChannelIO_zBus.rcx';
+		out.Circuit_Name = 'RZ6_CalibrateIO_softTrig.rcx';
 		out.Dnum = 1; % device number
 
 		% need to rework these functions!
 		out.RXinitFunc = @RZ6init;
-		out.PA5initFunc = @PA5init;
-		out.RPloadFunc = @RPload2;
+		% atten mode: 'PA5', 'RZ6', 'DIGITAL'
+		out.AttenMode = 'RZ6';
+		out.PA5initFunc = [];
+		out.RPloadFunc = @RPload;
 		out.RPrunFunc = @RPrun;
 		out.RPcheckstatusFunc = @RPcheckstatus;
 		out.RPsamplefreqFunc = @RPsamplefreq;
-		out.TDTsetFunc = @HeadphoneCal2_TDT_settings;
-		out.setattenFunc = @RZ6atten;
-		out.ioFunc = @hp2_calibration_io;
-		out.PA5closeFunc = @PA5close;
+		out.TDTsetFunc = @HeadphoneCal2_TDT_settings_RZ6;
+		out.setattenFunc = @RZ6setatten;
+		out.getattenFunc = @RZ6getatten;
+		out.ioFunc = @RZ6calibration_io;
+		out.PA5closeFunc = [];
 		out.RPcloseFunc = @RPclose;
 		return;
 

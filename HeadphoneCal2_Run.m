@@ -7,18 +7,22 @@
 
 %--------------------------------------------------------------------------
 % Sharad Shanbhag & Go Ashida
-% sshanbha@aecom.yu.edu
+% sshanbhag@neomed.edu
 % ashida@umd.edu
 %--------------------------------------------------------------------------
 % Original Versions Written (HeadphoneCal_RunCalibration, 
 %    HeadphoneCal_settings, HeadphoneCal_tdtinit, 
 %    HeadphoneCal_caldata_init, HeadphoneCal_tdtexit): 2008-2010 by SJS
 % Upgraded Version Created (HeadphoneCal2_Run): 2011-2012 by GA
+% Modified Version Created (HeadphoneCal2_Run): 2016 (SJS)
 %------------------------------------------------------------------------
-% Notes (Apr 2012, GA)
-%  Function handles are stored under the config structure and 
-%  defined in HeadphoneCal2_init.m
-%
+% Notes:
+%	Apr 2012, GA:
+%		Function handles are stored under the config structure and 
+%		defined in HeadphoneCal2_init.m
+%	29 Apr 2016 (SJS):
+%		- Reworking to allow direct use of calibration mic (no FR data)
+%------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initial setup
@@ -32,45 +36,53 @@ R = 2;
 MAX_ATTEN = 120;
 % making a local copy of the cal settings structure
 cal = handles.h2.cal;
-fr = handles.h2.fr;
 
-% check if FR files are loaded
-switch cal.Side 
-    case 'BOTH' 
-        if ~(fr.loadedR && fr.loadedL)
-            str = 'Load FR files (L and R) before calibration!'; 
-            set(handles.textMessage, 'String', str);
-            errordlg(str, 'FR file error');
-            return;
-        end
-        cal.frL = fr.frdataL; 
-        cal.frR = fr.frdataR; 
-        cal.frfileL = fr.frfileL;
-        cal.frfileR = fr.frfileR;
+% if user has chosen to use Microphone Frequency response
+% we need to make sure the data are loaded.
+if cal.UseFR
+	fr = handles.h2.fr;
 
-    case 'LEFT'
-        if ~fr.loadedL
-            str = 'Load FR file (L) before calibration!'; 
-            set(handles.textMessage, 'String', str);
-            errordlg(str, 'FR file error');
-            return;
-        end
-        cal.frL = fr.frdataL; 
-        cal.frR = HeadphoneCal2_dummyFR; % dummy data struct for R
-        cal.frfileL = fr.frfileL;
-        cal.frfileR = [];
-        
-    case 'RIGHT'
-        if ~fr.loadedR
-            str = 'Load FR file (R) before calibration!'; 
-            set(handles.textMessage, 'String', str);
-            errordlg(str, 'FR file error');
-            return;
-        end
-        cal.frL = HeadphoneCal2_dummyFR; % dummy data struct for L
-        cal.frR = fr.frdataR; 
-        cal.frfileL = [];
-        cal.frfileR = fr.frfileR;
+	% check if FR files are loaded
+	switch cal.Side 
+		 case 'BOTH' 
+			  if ~(fr.loadedR && fr.loadedL)
+					str = 'Load FR files (L and R) before calibration!'; 
+					set(handles.textMessage, 'String', str);
+					errordlg(str, 'FR file error');
+					return;
+			  end
+			  cal.frL = fr.frdataL; 
+			  cal.frR = fr.frdataR; 
+			  cal.frfileL = fr.frfileL;
+			  cal.frfileR = fr.frfileR;
+
+		 case 'LEFT'
+			  if ~fr.loadedL
+					str = 'Load FR file (L) before calibration!'; 
+					set(handles.textMessage, 'String', str);
+					errordlg(str, 'FR file error');
+					return;
+			  end
+			  cal.frL = fr.frdataL; 
+			  cal.frR = HeadphoneCal2_dummyFR; % dummy data struct for R
+			  cal.frfileL = fr.frfileL;
+			  cal.frfileR = [];
+
+		 case 'RIGHT'
+			  if ~fr.loadedR
+					str = 'Load FR file (R) before calibration!'; 
+					set(handles.textMessage, 'String', str);
+					errordlg(str, 'FR file error');
+					return;
+			  end
+			  cal.frL = HeadphoneCal2_dummyFR; % dummy data struct for L
+			  cal.frR = fr.frdataR; 
+			  cal.frfileL = [];
+			  cal.frfileR = fr.frfileR;
+	end
+else
+	cal.frL = HeadphoneCal2_dummyFR;
+	cal.frR = HeadphoneCal2_dummyFR;
 end
 
 % I/O channels
@@ -78,11 +90,22 @@ cal.OutChanL = handles.h2.config.OutChanL;
 cal.OutChanR = handles.h2.config.OutChanR;
 cal.InChanL = handles.h2.config.InChanL;
 cal.InChanR = handles.h2.config.InChanR;
-% Calibration Settings
-cal.RefMicSens = [cal.frL.cal.RefMicSens cal.frR.cal.RefMicSens];
-cal.VtoPa = cal.RefMicSens.^-1;  % Volts to Pascal factor
-cal.MicGain_dB = [cal.frL.cal.MicGain_dB cal.frR.cal.MicGain_dB];
-cal.MicGain = 10.^(cal.MicGain_dB./20); % mic gain factor
+% Calibration Microphone Settings
+if cal.UseFR
+	% get microphone settings from the FR data struct
+	cal.RefMicSens = [cal.frL.cal.RefMicSens cal.frR.cal.RefMicSens];
+	cal.MicGain_dB = [cal.frL.cal.MicGain_dB cal.frR.cal.MicGain_dB];
+else
+	% get microphone settings that were entered in GUI
+	cal.RefMicSens = [cal.MicSenseL cal.MicSenseR];
+	cal.MicGain_dB = [cal.MicGainL_dB cal.MicGainR_dB];
+end
+% pre-compute some conversion factors:
+% Volts to Pascal factor
+cal.VtoPa = cal.RefMicSens.^-1;
+% mic gain factor
+cal.MicGain = 10.^(cal.MicGain_dB./20);
+
 % Frequencies
 cal.F = [cal.Fmin cal.Fstep cal.Fmax];
 cal.Freqs = cal.Fmin : cal.Fstep : cal.Fmax;
@@ -131,9 +154,12 @@ tmpdev = config.RXinitFunc('GB', config.Dnum);
 iodev.C = tmpdev.C;
 iodev.handle = tmpdev.handle;
 iodev.status = tmpdev.status;
-% initialize PA5 attenuators (left = 1 and right = 2)
-PA5L = config.PA5initFunc('GB', 1);
-PA5R = config.PA5initFunc('GB', 2);
+% initialize attenuators
+if strcmpi(config.AttenMode, 'PA5')
+	% initialize PA5 attenuators (left = 1 and right = 2)
+	PA5L = config.PA5initFunc('GB', 1);
+	PA5R = config.PA5initFunc('GB', 2);
+end
 % load circuit
 iodev.rploadstatus = config.RPloadFunc(iodev); 
 % start circuit
@@ -147,6 +173,19 @@ iodev.Fs = config.RPsamplefreqFunc(iodev);
 % Set up TDT parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 config.TDTsetFunc(iodev, cal); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set up filtering
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%-----------------------------------------------------------------------
+% update bandpass filter for processing the data
+%-----------------------------------------------------------------------
+% Nyquist frequency
+fnyq = iodev.Fs / 2;
+% passband definition
+fband = [handles.h2.cal.HPFreq handles.h2.cal.LPFreq] ./ fnyq;
+% filter coefficients using a 3rd order Butterworth bandpass filter
+[fcoeffb, fcoeffa] = butter(3, fband, 'bandpass');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % setup storage variables -- caldata
@@ -279,69 +318,77 @@ while ~STOPFLAG && ( freq_index <= cal.Nfreqs )
     % tell user what frequency is being played
     update_ui_str(handles.editFreqVal, freq);  
 
-    if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'LEFT')  % LEFT    
-        % setup played/silent parameters
-        PLAYED = L;
-        SILENT = R;
-        PA5P = PA5L;  % played
-        PA5S = PA5R;  % silent
-        Patten = Latten;
-        Satten = MAX_ATTEN;
-        pmagadjval = cal.frL.magadjval; 
-        smagadjval = cal.frR.magadjval; 
-        pphiadjval = cal.frL.phiadjval;
-        sphiadjval = cal.frR.phiadjval;
-        editAttenP = handles.editAttenL;
-        editAttenS = handles.editAttenR;
-        editValP = handles.editValL;
-        editValS = handles.editValR;
-        editSPLP = handles.editSPLL;
-        editSPLS = handles.editSPLR;
-        axesStimP = handles.axesStimL;
-        axesStimS = handles.axesStimR;
-        axesRespP = handles.axesRespL;
-        axesRespS = handles.axesRespR;
-        Pcolor = 'g'; 
-        Scolor = 'r'; 
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%% go to main loop for recording responses and storing data %%%
-        HeadphoneCal2_Run_mainloop;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % store old value for the next freq
-        Latten = Patten; 
-    end  % LEFT
+	if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'LEFT')  % LEFT    
+		% setup played/silent parameters
+		PLAYED = L;
+		SILENT = R;
+		if strcmpi(config.AttenMode, 'PA5')
+			PA5P = PA5L;  % played
+			PA5S = PA5R;  % silent
+		end
+		Patten = Latten;
+		Satten = MAX_ATTEN;
+		atten_val(PLAYED) = Patten; %#ok<*SAGROW>
+		atten_val(SILENT) = Satten;
+		pmagadjval = cal.frL.magadjval; 
+		smagadjval = cal.frR.magadjval; 
+		pphiadjval = cal.frL.phiadjval;
+		sphiadjval = cal.frR.phiadjval;
+		editAttenP = handles.editAttenL;
+		editAttenS = handles.editAttenR;
+		editValP = handles.editValL;
+		editValS = handles.editValR;
+		editSPLP = handles.editSPLL;
+		editSPLS = handles.editSPLR;
+		axesStimP = handles.axesStimL;
+		axesStimS = handles.axesStimR;
+		axesRespP = handles.axesRespL;
+		axesRespS = handles.axesRespR;
+		Pcolor = 'g'; 
+		Scolor = 'r'; 
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%% go to main loop for recording responses and storing data %%%
+		HeadphoneCal2_Run_mainloop;
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		% store old value for the next freq
+		Latten = Patten; 
+	end  % LEFT
 
-    if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'RIGHT')  % RIGHT    
-        % setup played/silent parameters
-        PLAYED = R;
-        SILENT = L;
-        PA5P = PA5R;  % played
-        PA5S = PA5L;  % silent
-        Patten = Ratten;
-        Satten = MAX_ATTEN;
-        pmagadjval = cal.frR.magadjval;
-        smagadjval = cal.frL.magadjval;
-        pphiadjval = cal.frR.phiadjval;
-        sphiadjval = cal.frL.phiadjval;
-        editAttenP = handles.editAttenR;
-        editAttenS = handles.editAttenL;
-        editValP = handles.editValR;
-        editValS = handles.editValL;
-        editSPLP = handles.editSPLR;
-        editSPLS = handles.editSPLL;
-        axesStimP = handles.axesStimR;
-        axesStimS = handles.axesStimL;
-        axesRespP = handles.axesRespR;
-        axesRespS = handles.axesRespL;
-        Pcolor = 'r';
-        Scolor = 'g';
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%% go to main loop for recording responses and storing data %%%
-        HeadphoneCal2_Run_mainloop;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % store old value for the next freq 
-        Ratten = Patten; 
-    end  % RIGHT
+	if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'RIGHT')  % RIGHT    
+		% setup played/silent parameters
+		PLAYED = R;
+		SILENT = L;
+		if strcmpi(config.AttenMode, 'PA5')
+			PA5P = PA5R;  % played
+			PA5S = PA5L;  % silent
+		end
+		Patten = Ratten;
+		Satten = MAX_ATTEN;
+		atten_val(PLAYED) = Patten;
+		atten_val(SILENT) = Satten;
+		pmagadjval = cal.frR.magadjval;
+		smagadjval = cal.frL.magadjval;
+		pphiadjval = cal.frR.phiadjval;
+		sphiadjval = cal.frL.phiadjval;
+		editAttenP = handles.editAttenR;
+		editAttenS = handles.editAttenL;
+		editValP = handles.editValR;
+		editValS = handles.editValL;
+		editSPLP = handles.editSPLR;
+		editSPLS = handles.editSPLL;
+		axesStimP = handles.axesStimR;
+		axesStimS = handles.axesStimL;
+		axesRespP = handles.axesRespR;
+		axesRespS = handles.axesRespL;
+		Pcolor = 'r';
+		Scolor = 'g';
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		%%% go to main loop for recording responses and storing data %%%
+		HeadphoneCal2_Run_mainloop;
+		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+		% store old value for the next freq 
+		Ratten = Patten; 
+	end  % RIGHT
 
     % do some adjustments and calculations
     tmpleakmags{L}(freq_index, :) =...
@@ -399,8 +446,10 @@ cal.timer = toc; % get the time
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % exit gracefully 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-config.PA5closeFunc(PA5L);
-config.PA5closeFunc(PA5R);
+if strcmpi(config.AttenMode, 'PA5')
+	config.PA5closeFunc(PA5L);
+	config.PA5closeFunc(PA5R);
+end
 config.RPcloseFunc(iodev);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
