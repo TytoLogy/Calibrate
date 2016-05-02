@@ -458,30 +458,32 @@ config.RPcloseFunc(iodev);
 % check if we made it to the end of the frequencies
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if freq >= cal.Freqs(end) && ~handles.h2.ABORT % if yes, set the COMPLETE flag
-    handles.h2.COMPLETE = 1;
-    guidata(hObject, handles);
+	handles.h2.COMPLETE = 1;
+	guidata(hObject, handles);
 else % if not, skip the saving and return 
-    handles.h2.COMPLETE = 0;
-    handles.h2.caldata = caldata;
-    handles.h2.rawdata = rawdata;
-    guidata(hObject, handles);    
-    return;
+	handles.h2.COMPLETE = 0;
+	handles.h2.caldata = caldata;
+	handles.h2.rawdata = rawdata;
+	guidata(hObject, handles);    
+	return;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % save data to file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[fname, fpath] = uiputfile('*_cal2.mat', 'Save CAL Data');
+% by default, data will be written to temp_cal.mat
+% but first, query the user for a non-default file or location
+[fname, fpath] = uiputfile('*_cal.mat', 'Save CAL Data');
 if handles.h2.cal.SaveRawData
-    save('temp_cal2.mat', 'caldata', 'rawdata', '-mat');
-    if fname
-        save(fullfile(fpath, fname), 'caldata', 'rawdata', '-mat');
-    end
+	save('temp_cal.mat', 'caldata', 'rawdata', '-mat');
+	if fname
+		save(fullfile(fpath, fname), 'caldata', 'rawdata', '-mat');
+	end
 else 
-    save('temp_cal2.mat', 'caldata', '-mat');
-    if fname
-        save(fullfile(fpath, fname), 'caldata', '-mat');
-    end
+	save('temp_cal.mat', 'caldata', '-mat');
+	if fname
+		save(fullfile(fpath, fname), 'caldata', '-mat');
+	end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
