@@ -58,7 +58,7 @@ end
 function Calibrate_OpeningFcn(hObject, eventdata, handles, varargin)
     % display message
     str = [mfilename ' opening function called'];
-    update_ui_str(handles.textMessage, 'String', str);
+    update_ui_str(handles.textMessage, str);
     % initialize handles.h2 structure
     handles.h2 = struct();
     % setting defaults

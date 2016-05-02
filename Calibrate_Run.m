@@ -1,8 +1,8 @@
 %--------------------------------------------------------------------------
-% HeadphoneCal2_Run.m
+% Calibrate_Run.m
 %--------------------------------------------------------------------------
 %  Script that runs the calibration protocol
-%    This script is called by HeadphoneCal2.m
+%    This script is called by Calibrate.m
 %--------------------------------------------------------------------------
 
 %--------------------------------------------------------------------------
@@ -15,6 +15,7 @@
 %    HeadphoneCal_caldata_init, HeadphoneCal_tdtexit): 2008-2010 by SJS
 % Upgraded Version Created (HeadphoneCal2_Run): 2011-2012 by GA
 % Modified Version Created (HeadphoneCal2_Run): 2016 (SJS)
+% Evolving Version Written (Calibrate): 2016-? by SJS
 %------------------------------------------------------------------------
 % Notes:
 %	Apr 2012, GA:
@@ -22,6 +23,7 @@
 %		defined in HeadphoneCal2_init.m
 %	29 Apr 2016 (SJS):
 %		- Reworking to allow direct use of calibration mic (no FR data)
+%	2 May 2016 (SJS): caldata version now 2.2
 %------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +66,7 @@ if cal.UseFR
 					return;
 			  end
 			  cal.frL = fr.frdataL; 
-			  cal.frR = HeadphoneCal2_dummyFR; % dummy data struct for R
+			  cal.frR = fake_FR; % dummy data struct for R
 			  cal.frfileL = fr.frfileL;
 			  cal.frfileR = [];
 
@@ -75,7 +77,7 @@ if cal.UseFR
 					errordlg(str, 'FR file error');
 					return;
 			  end
-			  cal.frL = HeadphoneCal2_dummyFR; % dummy data struct for L
+			  cal.frL = fake_FR; % dummy data struct for L
 			  cal.frR = fr.frdataR; 
 			  cal.frfileL = [];
 			  cal.frfileR = fr.frfileR;
@@ -190,7 +192,7 @@ fband = [handles.h2.cal.HPFreq handles.h2.cal.LPFreq] ./ fnyq;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % setup storage variables -- caldata
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-caldata.version = '2.1';
+caldata.version = '2.2';
 caldata.time_str = datestr(now, 31);        % date and time
 caldata.timestamp = now;                % timestamp
 caldata.adFc = iodev.Fs;                % analog input rate 
@@ -348,7 +350,7 @@ while ~STOPFLAG && ( freq_index <= cal.Nfreqs )
 		Scolor = 'r'; 
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%% go to main loop for recording responses and storing data %%%
-		HeadphoneCal2_Run_mainloop;
+		Calibrate_mainloop;
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% store old value for the next freq
 		Latten = Patten; 
@@ -384,7 +386,7 @@ while ~STOPFLAG && ( freq_index <= cal.Nfreqs )
 		Scolor = 'g';
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		%%% go to main loop for recording responses and storing data %%%
-		HeadphoneCal2_Run_mainloop;
+		Calibrate_mainloop;
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		% store old value for the next freq 
 		Ratten = Patten; 
@@ -422,7 +424,7 @@ while ~STOPFLAG && ( freq_index <= cal.Nfreqs )
 
     % check if STOP_FLG is set
     if STOPFLAG
-        str = 'STOPFLAG detected';
+        str = 'STOPFLAG detected'; %#ok<UNRCH>
         set(handles.textMessage, 'String', str);
         if STOPFLAG == -1 
             errordlg('Attenuation maxed out!', 'Attenuation error');

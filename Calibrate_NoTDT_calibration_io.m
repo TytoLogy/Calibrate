@@ -1,9 +1,10 @@
-function [resp, index] = HeadphoneCal2_NoTDT_calibration_io(iodev, stim, inpts)
-% [resp, index] = HeadphoneCal2_NoTDT_calibration_io(iodev, stim, inpts)
-% 
-% Dummy function to used with the NO_TDT configuration
+function [resp, index] = Calibrate_NoTDT_calibration_io(iodev, stim, inpts)
+%------------------------------------------------------------------------
+% [resp, index] = Calibrate_NoTDT_calibration_io(iodev, stim, inpts)
+%------------------------------------------------------------------------ 
+% I/O function used with the NO_TDT configuration
 % Returns dummy response data
-%
+%------------------------------------------------------------------------
 % Input Arguments:
 % 	iodev	TDT input/output device interface structure
 %	stim	[2XN] stimulus array, L channel in row 1, R channel in row 2
@@ -12,15 +13,16 @@ function [resp, index] = HeadphoneCal2_NoTDT_calibration_io(iodev, stim, inpts)
 % Output Arguments:
 % 	resp	2 element response cell array
 %	index	buffer size
-%
 %------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
 %  Go Ashida
-%   ashida@umd.edu
-%------------------------------------------------------------------------
+%  ashida@umd.edu
+%	Sharad Shanbhag
+%	sshanbhag@neomed.edu
 %------------------------------------------------------------------------
 % Created (HeadphoneCal2_NoTDT_calibration_io): Apr 2012 by GA
+% Evolving Version Written (Calibrate): 2016-? by SJS
 %
 % Revisions: 
 % 
