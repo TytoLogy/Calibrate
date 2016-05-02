@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+#matlab things to ignore (usually data/calibration files)
+*_cal.mat
+*_cal2.mat
