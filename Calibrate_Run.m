@@ -198,7 +198,7 @@ caldata.timestamp = now;                % timestamp
 caldata.adFc = iodev.Fs;                % analog input rate 
 caldata.daFc = iodev.Fs;                % analog output rate 
 caldata.F = cal.F;                    % freq range (matlab string)
-caldata.Freqs = cal.Freqs;            % frequencies (matlab array)
+caldata.freq = cal.Freqs;            % frequencies (matlab array)
 caldata.Nfreqs = cal.Nfreqs;                % number of freqs to collect
 caldata.Reps = cal.Reps;                % reps per frequency
 caldata.cal = cal;                   % parameters for calibration session
@@ -255,7 +255,7 @@ caldata.atten = tmparr;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % setup cell for raw data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rawdata.Freqs = caldata.Freqs;
+rawdata.freq = caldata.freq;
 rawdata.resp = cell(cal.Nfreqs, cal.Reps);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

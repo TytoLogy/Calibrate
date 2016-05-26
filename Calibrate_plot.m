@@ -18,15 +18,15 @@ function Calibrate_plot(caldata, figtitle)
 %------------------------------------------------------------------------
 
 if ~isstruct(caldata)
-    disp([mfilename ': invalid CAL data']);
-    return;
-end
-if ~isfield(caldata, 'Freqs')
-    disp([mfilename ': invalid CAL frequency data: freq not found']);
+	disp([mfilename ': invalid CAL data']);
 	return;
 end
-if isempty(caldata.Freqs)
-    disp([mfilename ': invalid CAL frequency data: freq is empty']);
+if ~isfield(caldata, 'freq')
+	disp([mfilename ': invalid CAL frequency data: freq not found']);
+	return;
+end
+if isempty(caldata.freq)
+	disp([mfilename ': invalid CAL frequency data: freq is empty']);
 	return; 
 end
 
@@ -36,72 +36,72 @@ R = 2;
 % open figure window and set figure title 
 figure;
 if nargin > 1  % if figure title is provided, then set it
-    set(gcf, 'name', figtitle);
+	set(gcf, 'name', figtitle);
 end
 
 subplot(3,2,1);
-errorbar(caldata.Freqs, caldata.mag(L, :), caldata.mag_stderr(L, :), '.-g');
+errorbar(caldata.freq, caldata.mag(L, :), caldata.mag_stderr(L, :), '.-g');
 hold on;
-errorbar(caldata.Freqs, caldata.mag(R, :), caldata.mag_stderr(R, :), '.-r');
+errorbar(caldata.freq, caldata.mag(R, :), caldata.mag_stderr(R, :), '.-r');
 hold off;
 title('Calibration Results');
 ylabel('Max Intensity (db SPL)');
-legend('L', 'R');
+legend('L', 'R', 'Location', 'Best');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
 
 subplot(3,2,3);
-errorbar(caldata.Freqs, unwrap(caldata.phase(L, :)), caldata.phase_stderr(L, :), '.-g');
+errorbar(caldata.freq, unwrap(caldata.phase(L, :)), caldata.phase_stderr(L, :), '.-g');
 hold on;
-errorbar(caldata.Freqs, unwrap(caldata.phase(R, :)), caldata.phase_stderr(R, :), '.-r');
+errorbar(caldata.freq, unwrap(caldata.phase(R, :)), caldata.phase_stderr(R, :), '.-r');
 hold off;
 ylabel('Phase');
-legend('L','R');
+% legend('L','R');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
 
 subplot(3,2,5);
-errorbar(caldata.Freqs, caldata.dist(L, :)*100, caldata.dist_stderr(L, :)*100, '.-g');
+errorbar(caldata.freq, caldata.dist(L, :)*100, caldata.dist_stderr(L, :)*100, '.-g');
 hold on;
-errorbar(caldata.Freqs, caldata.dist(R, :)*100, caldata.dist_stderr(R, :)*100, '.-r');
+errorbar(caldata.freq, caldata.dist(R, :)*100, caldata.dist_stderr(R, :)*100, '.-r');
 hold off;
 ylabel('Distortion (%)');
-legend('L', 'R');
+% legend('L', 'R');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
 
 subplot(3,2,2);
-errorbar(caldata.Freqs, caldata.leakmag(L, :), caldata.leakmag_stderr(L, :), '.-g');
+errorbar(caldata.freq, caldata.leakmag(L, :), caldata.leakmag_stderr(L, :), '.-g');
 hold on;
-errorbar(caldata.Freqs, caldata.leakmag(R, :), caldata.leakmag_stderr(R, :), '.-r');
+errorbar(caldata.freq, caldata.leakmag(R, :), caldata.leakmag_stderr(R, :), '.-r');
 hold off;
 ylabel('Leak magnitude (dB)');
-legend('L','R');
+% legend('L','R');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
 
 subplot(3,2,4);
-errorbar(caldata.Freqs, unwrap(caldata.leakphase(L, :)), caldata.leakphase_stderr(L, :), '.-g');
+errorbar(caldata.freq, unwrap(caldata.leakphase(L, :)), caldata.leakphase_stderr(L, :), '.-g');
 hold on;
-errorbar(caldata.Freqs, unwrap(caldata.leakphase(R, :)), caldata.leakphase_stderr(R, :), '.-r');
+errorbar(caldata.freq, unwrap(caldata.leakphase(R, :)), caldata.leakphase_stderr(R, :), '.-r');
 hold off;
 ylabel('Leak phase');
-legend('L','R');
+% legend('L','R');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
 
 subplot(3,2,6);
-errorbar(caldata.Freqs, caldata.leakdist(L, :)*100, caldata.leakdist_stderr(L, :)*100, '.-g');
+errorbar(caldata.freq, caldata.leakdist(L, :)*100, caldata.leakdist_stderr(L, :)*100, '.-g');
 hold on;
-errorbar(caldata.Freqs, caldata.leakdist(R, :)*100, caldata.leakdist_stderr(R, :)*100, '.-r');
+errorbar(caldata.freq, caldata.leakdist(R, :)*100, caldata.leakdist_stderr(R, :)*100, '.-r');
 hold off;
 ylabel('Leak distortion (%)');
-legend('L','R');
+% legend('L','R');
 xlim([caldata.F(1) caldata.F(3)]);
 set(gca, 'XGrid', 'on');
 set(gca, 'YGrid', 'on');
