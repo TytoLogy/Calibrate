@@ -63,6 +63,8 @@ switch upper(stype)
 		out.TTLPulseDur = 1;
 		out.HPFreq = 100;
 		out.LPFreq = 16000;
+		
+		out.Fs = 44100;
 
 		out.SaveRawData = 0; 
 		return;

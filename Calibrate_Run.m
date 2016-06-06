@@ -170,6 +170,8 @@ config.RPrunFunc(iodev);
 iodev.status = config.RPcheckstatusFunc(iodev);
 % Query the sample rate from the circuit 
 iodev.Fs = config.RPsamplefreqFunc(iodev);
+% store in cal struct
+cal.Fs = iodev.Fs;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set up TDT parameters

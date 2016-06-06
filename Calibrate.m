@@ -7,7 +7,7 @@ function varargout = Calibrate(varargin)
 %   handle to
 %      the existing singleton*.
 
-% Last Modified by GUIDE v2.5 02-May-2016 16:49:30
+% Last Modified by GUIDE v2.5 06-Jun-2016 16:32:58
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag & Go Ashida
@@ -851,6 +851,15 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
+
+
+
+%--------------------------------------------------------------------------
+function buttonDebug_Callback(hObject, eventdata, handles)
+	keyboard
+%--------------------------------------------------------------------------
+
+%--------------------------------------------------------------------------
 function editOutChanL_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
@@ -943,6 +952,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
+
+
 
 
 
