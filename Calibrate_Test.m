@@ -221,6 +221,16 @@ switch cal.AttenType
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% noise test ranges
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+minfreq = 5000;
+maxfreq = 90000;
+midfreq = floor( 0.5*(maxfreq-minfreq) );
+noise_freqs = {	[minfreq maxfreq]; ...
+						[minfreq midfreq]; ...
+						[midfreq maxfreq] };
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set up arrays to hold data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tmpcell = cell(2,1);  % L = 1; R = 2; 
@@ -235,11 +245,16 @@ tmpleakdists = tmpcell;
 tmpdistphis = tmpcell;
 tmpleakdistphis = tmpcell;
 tmpmaxmags = tmpcell;
+tmpnoisemags = cell(2, 1);
+tmpnoisemags{1} = zeros(length(noise_freqs), cal.Reps);
+tmpnoisemags{2} = zeros(length(noise_freqs), cal.Reps);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % setup cell for raw data 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rawdata.freq = testdata.freq;
 rawdata.resp = cell(cal.Nfreqs, cal.Reps);
+rawdata.noiseresp = cell(length(noise_freqs), cal.Reps);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set the start and end bins for the calibration
@@ -252,6 +267,12 @@ end_bin = start_bin + ms2bin(cal.Duration - 2*cal.Ramp, iodev.Fs);
 zerostim = syn_null(cal.Duration, iodev.Fs, 1);  % make zeros for both channels
 outpts = length(zerostim);
 acqpts = ms2bin(cal.AcqDuration, iodev.Fs);
+
+stim_start_bin = ms2bin(cal.Ramp, iodev.Fs);
+if stim_start_bin < 1
+	stim_start_bin = 1;
+end
+stim_end_bin = start_bin + ms2bin(cal.Duration - 2*cal.Ramp, iodev.Fs);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % set up vectors for plots
@@ -419,6 +440,67 @@ while ~STOPFLAG && ( freq_index <= cal.Nfreqs )
 	end
 
 end %****** end of cal loop
+
+
+% ****** main LOOP through the bands ******		
+for loop = 1:length(noise_freqs)
+	Fmin = noise_freqs{loop}(1);
+	Fmax = noise_freqs{loop}(2);
+	
+	if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'LEFT')  % LEFT    
+		% setup played/silent parameters
+		PLAYED = L;
+		SILENT = R;
+		if strcmpi(config.AttenMode, 'PA5')
+			PA5P = PA5L;  % played
+			PA5S = PA5R;  % silent
+		end
+		Patten = Latten;
+		Satten = MAX_ATTEN;
+		atten_val(PLAYED) = Patten; %#ok<*SAGROW>
+		atten_val(SILENT) = Satten;
+		Pcolor = 'g'; 
+		Scolor = 'r';
+		
+		Calibrate_testloop_noise;
+		
+	end
+
+	if strcmp(cal.Side, 'BOTH') || strcmp(cal.Side, 'RIGHT')  % RIGHT    
+		% setup played/silent parameters
+		PLAYED = R;
+		SILENT = L;
+		if strcmpi(config.AttenMode, 'PA5')
+			PA5P = PA5R;  % played
+			PA5S = PA5L;  % silent
+		end
+		Patten = Ratten;
+		Satten = MAX_ATTEN;
+		atten_val(PLAYED) = Patten;
+		atten_val(SILENT) = Satten;
+		Pcolor = 'r';
+		Scolor = 'g';
+		Calibrate_testloop_noise;
+	end
+
+	% check if user pressed ABORT button 
+	if read_ui_val(handles.buttonAbort) == 1
+		str = 'ABORTING Calibration';
+		set(handles.textMessage, 'String', str);
+		handles.h2.ABORT = 1;
+		guidata(hObject, handles);    
+		break;
+	end
+
+end %****** end of cal loop
+
+
+
+
+
+
+
+
 cal.timer = toc; % get the time
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

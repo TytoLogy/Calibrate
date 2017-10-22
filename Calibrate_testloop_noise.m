@@ -1,5 +1,5 @@
 %--------------------------------------------------------------------------
-% Calibrate_testloop.m
+% Calibrate_testloop_noise.m
 %--------------------------------------------------------------------------
 % Calibration Toolbox:Calibrate
 %--------------------------------------------------------------------------
@@ -19,8 +19,15 @@
 %--------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% synthesize stimulus
-stim = synmonosine(cal.Duration, iodev.Fs, freq, caldata.DAscale, caldata);
+% synthesize noise
+% stim = synmonosine(cal.Duration, iodev.Fs, freq, caldata.DAscale, caldata);
+stim = synmononoise_fft(	cal.Duration, ...
+											iodev.Fs, ...
+											Fmin, ...
+											Fmax, ...
+											1, ...
+											caldata);
+stim = caldata.DAscale * normalize(stim);
 S(PLAYED, :) = stim;
 S(SILENT, :) = zerostim(SILENT, :);
 S = sin2array(S, cal.Ramp, iodev.Fs);
@@ -34,8 +41,8 @@ stimvecS(delay_bin+1 : delay_bin+duration_bin) = S(SILENT, :); % copy stim data
 plot(axesStimS, tvec, stimvecS, Scolor);
 % figure out attenuation value 
 stim_rms = rms(stim);
-atten_val(PLAYED) = figure_mono_atten_tone(Patten, stim_rms, caldata);
-fprintf('freq: %.0f rms: %.4f max: %.4f atten: %.2f\n', freq, stim_rms, max(stim), atten_val(PLAYED));
+atten_val(PLAYED) = figure_mono_atten_noise(Patten, stim_rms, caldata);
+fprintf('rms: %.4f max: %.4f, atten: %.2f\n', stim_rms, max(stim), atten_val(PLAYED));
 atten_val(SILENT) = MAX_ATTEN;
 if strcmpi(config.AttenMode, 'PA5')
 	% no need to test attenuation but do need to set the attenuators
@@ -61,34 +68,24 @@ for rep = 1:cal.Reps
 	% plot the response
 	plot(axesRespP, tvec, resp{PLAYED}, Pcolor);
 	plot(axesRespS, tvec, resp{SILENT}, Scolor);
-	% determine the magnitude and phase of the response/leak
-	[pmag, pphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, freq);
-	[smag, sphi] = fitsinvec(resp{SILENT}(start_bin:end_bin), 1, iodev.Fs, freq);
-	[pdistmag, pdistphi] = fitsinvec(resp{PLAYED}(start_bin:end_bin), 1, iodev.Fs, 2*freq);    
-	[sdistmag, sdistphi] = fitsinvec(resp{SILENT}(start_bin:end_bin), 1, iodev.Fs, 2*freq);                
-	% compute 2nd harmonic distortion ratio
-	tmpdists{PLAYED}(freq_index, rep) = pdistmag / pmag; %#ok<*SAGROW>
-	tmpleakdists{SILENT}(freq_index, rep) = sdistmag / smag;
-	tmpdistphis{PLAYED}(freq_index, rep) = pdistphi - pphiadjval(freq_index);
-	tmpleakdistphis{SILENT}(freq_index, rep) = sdistphi - sphiadjval(freq_index);
-	% adjust for the gain of the preamp and convert to RMS
-	pmag = cal.RMSsin * pmag / ( pmagadjval(freq_index) * cal.MicGain(PLAYED) );
-	smag = cal.RMSsin * smag / ( smagadjval(freq_index) * cal.MicGain(SILENT) );
+	% determine the magnitude of the response/leak
+	pmag = rms(resp{PLAYED}(start_bin:end_bin));
+	smag = rms(resp{SILENT}(start_bin:end_bin));
+	% adjust for the gain of the preamp (for non-calibration mics, this is
+	% inaccurate!!!!!)
+	pmag = pmag / cal.MicGain(PLAYED);
+	smag = smag / cal.MicGain(SILENT);
 	% store the data in arrays
-	tmprawmags{PLAYED}(freq_index, rep) = dbspl( cal.VtoPa(PLAYED) * pmag );
-	tmpleakmags{SILENT}(freq_index, rep) = dbspl( cal.VtoPa(SILENT) * smag );
-	tmpphis{PLAYED}(freq_index, rep) = pphi - pphiadjval(freq_index);
-	tmpleakphis{SILENT}(freq_index, rep) = sphi - sphiadjval(freq_index);
+	tmpnoisemags{PLAYED}(loop, rep) = dbspl( cal.VtoPa(PLAYED) * pmag );
+	tmpnoisemags{SILENT}(loop, rep) = dbspl( cal.VtoPa(SILENT) * smag );
 	% show calculated values
 	update_ui_str(editValP, sprintf('%.4f', 1000*pmag));
 	update_ui_str(editSPLP, sprintf('%.2f', dbspl(cal.VtoPa(PLAYED)*pmag)));
 	update_ui_str(editValS, sprintf('%.4f', 1000*smag));
 	update_ui_str(editSPLS, sprintf('%.2f', dbspl(cal.VtoPa(SILENT)*smag)));
-	% save mags
-	tmpmaxmags{PLAYED}(freq_index, rep) = ...
-											tmprawmags{PLAYED}(freq_index, rep);
+	fprintf('\t\tresp rms: %.4f dbSPL: %.4f\n', pmag, dbspl(cal.VtoPa(PLAYED)*pmag));
 	% store the raw response data
-	rawdata.resp{freq_index, rep} = cell2mat(resp');
+	rawdata.noiseresp{loop, rep} = cell2mat(resp');
 	% check if user pressed ABORT button 
 	if read_ui_val(handles.buttonAbort) == 1
 		str = 'ABORT button pressed';
