@@ -76,8 +76,8 @@ for rep = 1:cal.Reps
 	pmag = pmag / cal.MicGain(PLAYED);
 	smag = smag / cal.MicGain(SILENT);
 	% store the data in arrays
-	tmpnoisemags{PLAYED}(loop, rep) = dbspl( cal.VtoPa(PLAYED) * pmag );
-	tmpnoisemags{SILENT}(loop, rep) = dbspl( cal.VtoPa(SILENT) * smag );
+	tmpnoisemags{PLAYED}(loop, rep) = dbspl( cal.VtoPa(PLAYED) * pmag ); %#ok<SAGROW>
+	tmpnoisemags{SILENT}(loop, rep) = dbspl( cal.VtoPa(SILENT) * smag ); %#ok<SAGROW>
 	% show calculated values
 	update_ui_str(editValP, sprintf('%.4f', 1000*pmag));
 	update_ui_str(editSPLP, sprintf('%.2f', dbspl(cal.VtoPa(PLAYED)*pmag)));
