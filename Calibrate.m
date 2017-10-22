@@ -7,7 +7,7 @@ function varargout = Calibrate(varargin)
 %   handle to
 %      the existing singleton*.
 
-% Last Modified by GUIDE v2.5 06-Jun-2016 16:32:58
+% Last Modified by GUIDE v2.5 22-Oct-2017 16:21:52
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag & Go Ashida
@@ -287,6 +287,33 @@ function buttonAbort_Callback(hObject, eventdata, handles)
     % save handles structure
     guidata(hObject, handles); 
 %--------------------------------------------------------------------------
+function buttonTestCalibration_Callback(hObject, eventdata, handles)
+%------------------------------------------------
+% --- Run Calibration test
+%------------------------------------------------
+% display message
+	str = 'Starting Calibration'; 
+	set(handles.textMessage, 'String', str);
+	% updating buttons 
+	disable_ui(handles.buttonTestCalibration);
+	enable_ui(handles.buttonAbort);
+	update_ui_val(handles.buttonAbort, 0);
+	% update complete flag
+	handles.h2.COMPLETE = 0;
+	guidata(hObject, handles);
+	% go to main part
+	Calibrate_Test;
+	% updating buttons 
+	enable_ui(handles.buttonTestCalibration);
+	disable_ui(handles.buttonAbort);
+	update_ui_val(handles.buttonAbort, 0); 
+	% if completed then plot data
+	if handles.h2.COMPLETE
+		Calibrate_testplot(handles.h2.testdata);
+	end
+	% save handles structure
+	guidata(hObject, handles);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Plot button callback
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -952,6 +979,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 %--------------------------------------------------------------------------
+
+
+
 
 
 
