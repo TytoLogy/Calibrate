@@ -27,7 +27,7 @@ function varargout = Calibrate(varargin)
 %--------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Initialization code automatically created by the Matlab GUIDE function 
+% Initialization code automatically created by the Matlab GUIDE function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 % Begin initialization code - DO NOT EDIT

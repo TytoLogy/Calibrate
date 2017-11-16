@@ -187,6 +187,36 @@ switch upper(stype)
 		out.RPcloseFunc = @RPclose;
 		return;
 
+	% for RZ6, 200 kHz sample rate
+	case 'RZ6_200K'
+		disp('RZ6_200K selected');
+		out.CONFIGNAME = stype;
+		out.OutChanL = 1;
+		out.OutChanR = 2;
+		out.InChanL = 1;
+		out.InChanR = 2;
+
+		out.Circuit_Path = 'C:\TytoLogy\Toolboxes\TDTToolbox\Circuits\RZ6';
+		out.Circuit_Name = 'RZ6_CalibrateIO_softTrig.rcx';
+		out.Dnum = 1; % device number
+
+		% need to rework these functions!
+		out.RXinitFunc = @RZ6init;
+		% atten mode: 'PA5', 'RZ6', 'DIGITAL'
+		out.AttenMode = 'RZ6';
+		out.PA5initFunc = [];
+		out.RPloadFunc = @RPload;
+		out.RPrunFunc = @RPrun;
+		out.RPcheckstatusFunc = @RPcheckstatus;
+		out.RPsamplefreqFunc = @RPsamplefreq;
+		out.TDTsetFunc = @HeadphoneCal2_TDT_settings_RZ6;
+		out.setattenFunc = @RZ6setatten;
+		out.getattenFunc = @RZ6getatten;
+		out.ioFunc = @RZ6calibration_io;
+		out.PA5closeFunc = [];
+		out.RPcloseFunc = @RPclose;
+		return;
+		
 	% trap unknown type
 	otherwise
 		disp([mfilename ': unknown parameter ' stype '...']);
