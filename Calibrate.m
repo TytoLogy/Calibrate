@@ -7,7 +7,7 @@ function varargout = Calibrate(varargin)
 %   handle to
 %      the existing singleton*.
 
-% Last Modified by GUIDE v2.5 22-Oct-2017 16:21:52
+% Last Modified by GUIDE v2.5 16-Nov-2017 17:37:04
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag & Go Ashida
@@ -124,8 +124,8 @@ function popupTDT_Callback(hObject, eventdata, handles)
 function buttonSaveSettings_Callback(hObject, eventdata, handles)
 	% get settingsfile name
 	[fname, fpath] =	uiputfile(	...
-								'*_CalibrateSettings.mat', ...
-								'Save Calibrate settings file...' ...
+								sprintf('*_%sSettings.mat', mfilename), ...
+								sprintf('Save %s settings file...', mfilename) ...
 							);
 	if fname == 0 % return if user hits CANCEL button
 		str = 'saving cancelled...';
@@ -366,6 +366,12 @@ function buttonPlotFR_Callback(hObject, eventdata, handles)
         MicrophoneCal2_plot(handles.h2.fr.frdataR, 'Right FR');
     end
 %--------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+% --- Executes on button press in buttonBuildFIR.
+%--------------------------------------------------------------------------
+function buttonBuildFIR_Callback(hObject, eventdata, handles)
+%--------------------------------------------------------------------------
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SaveRawData checkbox
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -814,43 +820,59 @@ function editValR_Callback(hObject, eventdata, handles)
 function editSPLR_Callback(hObject, eventdata, handles)
     update_ui_str(hObject, '--');  % resetting to '--'
 %--------------------------------------------------------------------------
+
+
+%--------------------------------------------------------------------------
+function buttonDebug_Callback(hObject, eventdata, handles)
+	keyboard
+%--------------------------------------------------------------------------
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create Functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %--------------------------------------------------------------------------
 function editFmin_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editFmax_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editFstep_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editReps_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editMinLevel_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editMaxLevel_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editAttenStep_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editAttenFixed_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editSenseL_CreateFcn(hObject, eventdata, handles)
 	if ispc && isequal(get(hObject,'BackgroundColor'), ...
@@ -863,123 +885,136 @@ function editSenseR_CreateFcn(hObject, eventdata, handles)
 		 set(hObject,'BackgroundColor','white');
 	end
 function editGainL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-		get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editGainR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), ...
-		get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function popupTDT_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-%--------------------------------------------------------------------------
-
-
-
-%--------------------------------------------------------------------------
-function buttonDebug_Callback(hObject, eventdata, handles)
-	keyboard
-%--------------------------------------------------------------------------
-
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editOutChanL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editOutChanR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editInChanL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editInChanR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editISI_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editDuration_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editDelay_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editRamp_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editDAlevel_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editAcqDuration_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editSweepPeriod_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editTTLPulseDur_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editHPFreq_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editLPFreq_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 function editFreqVal_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editRepVal_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editAttenL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editValL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editSPLL_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editValR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editSPLR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 function editAttenR_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
-
 
 
 

@@ -1,6 +1,10 @@
 %------------------------------------------------------------------------
 % Calibrate_updateUI.m
 %------------------------------------------------------------------------
+% TytoLogy:Calibration:Calibrate
+%------------------------------------------------------------------------
+% update the UI from values in h2 struct
+%------------------------------------------------------------------------
 
 %------------------------------------------------------------------------
 %  Go Ashida & Sharad Shanbhag
@@ -16,14 +20,15 @@
 % 	- adding toggle to use or not use FR file
 %--------------------------------------------------------------------------
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% update the UI values
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%----------------------------------------------------------
 % microphone settings
+%----------------------------------------------------------
 update_ui_str(handles.editGainL, handles.h2.cal.MicGainL_dB);
 update_ui_str(handles.editGainR, handles.h2.cal.MicGainR_dB);
 
+%----------------------------------------------------------
 % enable ctrls if UseFR checkbox is selected
+%----------------------------------------------------------
 UseFR_enable_list = [	handles.buttonLoadFRL handles.buttonLoadFRR ...
 								handles.textFRFileL	handles.textFRFileR	...
 								handles.textFRL	handles.textFRR	];
@@ -39,7 +44,10 @@ else
 	enable_ui(UseFR_disable_list);
 end
 
+%----------------------------------------------------------
 % calibration settings
+%----------------------------------------------------------
+% frequency range, frequency steps, repetitions
 update_ui_str(handles.editFmin, handles.h2.cal.Fmin);
 update_ui_str(handles.editFmax, handles.h2.cal.Fmax);
 update_ui_str(handles.editFstep, handles.h2.cal.Fstep);
@@ -54,7 +62,6 @@ switch str
     case 'RIGHT'
     set(handles.radioSide, 'SelectedObject', handles.radioRight);
 end
-
 % attenuation settings
 update_ui_str(handles.editMinLevel, handles.h2.cal.MinLevel);
 update_ui_str(handles.editMaxLevel, handles.h2.cal.MaxLevel);
@@ -77,26 +84,32 @@ switch str
     enable_ui(handles.editAttenFixed);             
 end
 
+%----------------------------------------------------------
 % stimulus settings
+%----------------------------------------------------------
 update_ui_str(handles.editISI, handles.h2.cal.ISI);
 update_ui_str(handles.editDuration, handles.h2.cal.Duration);
 update_ui_str(handles.editDelay, handles.h2.cal.Delay);
 update_ui_str(handles.editRamp, handles.h2.cal.Ramp);
 update_ui_str(handles.editDAlevel, handles.h2.cal.DAlevel);
 
+%----------------------------------------------------------
 % TDT settings
+%----------------------------------------------------------
 update_ui_str(handles.editAcqDuration, handles.h2.cal.AcqDuration);
 update_ui_str(handles.editSweepPeriod, handles.h2.cal.SweepPeriod);
 update_ui_str(handles.editTTLPulseDur, handles.h2.cal.TTLPulseDur);
 update_ui_str(handles.editHPFreq, handles.h2.cal.HPFreq);
 update_ui_str(handles.editLPFreq, handles.h2.cal.LPFreq);
 
+%----------------------------------------------------------
 % channel settings
+%----------------------------------------------------------
 try
-update_ui_str(handles.editOutChanL, handles.h2.config.OutChanL);
-update_ui_str(handles.editOutChanR, handles.h2.config.OutChanR);
-update_ui_str(handles.editInChanL, handles.h2.config.InChanL);
-update_ui_str(handles.editInChanR, handles.h2.config.InChanR);
+	update_ui_str(handles.editOutChanL, handles.h2.config.OutChanL);
+	update_ui_str(handles.editOutChanR, handles.h2.config.OutChanR);
+	update_ui_str(handles.editInChanL, handles.h2.config.InChanL);
+	update_ui_str(handles.editInChanR, handles.h2.config.InChanR);
 catch
 	keyboard
 end
