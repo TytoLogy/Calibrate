@@ -7,7 +7,7 @@ function varargout = Calibrate(varargin)
 %   handle to
 %      the existing singleton*.
 
-% Last Modified by GUIDE v2.5 16-Nov-2017 17:37:04
+% Last Modified by GUIDE v2.5 28-May-2019 17:36:15
 
 %------------------------------------------------------------------------
 %  Sharad Shanbhag & Go Ashida
@@ -1014,11 +1014,28 @@ function editAttenR_CreateFcn(hObject, eventdata, handles)
 			get(0,'defaultUicontrolBackgroundColor'))
 		 set(hObject,'BackgroundColor','white');
 	end
+function popupCalibrationMode_CreateFcn(hObject, eventdata, handles)
+	if ispc && isequal(get(hObject,'BackgroundColor'), ...
+			get(0,'defaultUicontrolBackgroundColor'))
+		 set(hObject,'BackgroundColor','white');
+	end
 %--------------------------------------------------------------------------
 
 
 
 
 
+
+
+
+
+% --- Executes on selection change in popupCalibrationMode.
+function popupCalibrationMode_Callback(hObject, eventdata, handles)
+% hObject    handle to popupCalibrationMode (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupCalibrationMode contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupCalibrationMode
 
 
