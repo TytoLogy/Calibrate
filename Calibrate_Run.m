@@ -24,6 +24,7 @@
 %	29 Apr 2016 (SJS):
 %		- Reworking to allow direct use of calibration mic (no FR data)
 %	2 May 2016 (SJS): caldata version now 2.2
+%	4 Jun 2019 (SJS): added feedback on sample rate on init
 %------------------------------------------------------------------------
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,7 +177,11 @@ cal.Fs = iodev.Fs;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set up TDT parameters
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-config.TDTsetFunc(iodev, cal); 
+config.TDTsetFunc(iodev, cal);
+
+% print Fs feedback
+fprintf('%s: iodevice Fs = %.2f (F_Nyquist = %.2f)\n', ...
+													mfilename, iodev.Fs, iodev.Fs / 2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set up filtering

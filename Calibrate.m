@@ -123,8 +123,9 @@ function popupTDT_Callback(hObject, eventdata, handles)
 %--------------------------------------------------------------------------
 function buttonSaveSettings_Callback(hObject, eventdata, handles)
 	% get settingsfile name
+	defaultfile = sprintf('%s_%sSettings.mat', datestr(now, 1), mfilename);
 	[fname, fpath] =	uiputfile(	...
-								sprintf('*_%sSettings.mat', mfilename), ...
+								defaultfile, ...
 								sprintf('Save %s settings file...', mfilename) ...
 							);
 	if fname == 0 % return if user hits CANCEL button
@@ -144,8 +145,9 @@ function buttonSaveSettings_Callback(hObject, eventdata, handles)
 %--------------------------------------------------------------------------
 function buttonLoadSettings_Callback(hObject, eventdata, handles)
     % get file name
+	defaultfile = sprintf('*_%sSettings.mat', mfilename);
 	[fname, fpath] =	uigetfile(	...
-								sprintf('*_%sSettings.mat', mfilename), ...
+								defaultfile, ...
 								sprintf('Load %s settings file...', mfilename) ...
 							);
 	if fname == 0 % return if user hits CANCEL button
@@ -785,7 +787,7 @@ function editLPFreq_Callback(hObject, eventdata, handles)
     set(handles.textMessage, 'String', str);
     % check limits
     tmp = read_ui_str(hObject, 'n');
-    if checklim(tmp, [handles.h2.cal.HPFreq, 25000]) 
+    if checklim(tmp, [handles.h2.cal.HPFreq, 97656.25]) 
         handles.h2.cal.LPFreq = tmp;
         guidata(hObject, handles);
     else % resetting to old value
