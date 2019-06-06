@@ -494,13 +494,6 @@ for loop = 1:length(noise_freqs)
 
 end %****** end of cal loop
 
-
-
-
-
-
-
-
 cal.timer = toc; % get the time
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

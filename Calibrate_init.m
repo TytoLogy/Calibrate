@@ -187,6 +187,7 @@ switch upper(stype)
 		out.RPcloseFunc = @RPclose;
 		return;
 
+	%{
 	% for RZ6, 200 kHz sample rate
 	case 'RZ6_200K'
 		disp('RZ6_200K selected');
@@ -216,6 +217,7 @@ switch upper(stype)
 		out.PA5closeFunc = [];
 		out.RPcloseFunc = @RPclose;
 		return;
+	%}
 		
 	% trap unknown type
 	otherwise
