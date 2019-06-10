@@ -74,6 +74,8 @@ function Calibrate_OpeningFcn(hObject, eventdata, handles, varargin)
     handles.h2.COMPLETE = 0;
     % resetting ABORT flag
     handles.h2.ABORT = 0;
+	 % default path for settings
+	 handles.h2.SettingsPath = fullfile(TytoLogySettingsPath, 'Calibrate');
     % save handles structure
     guidata(hObject, handles);
     % updating the GUI
@@ -125,7 +127,7 @@ function buttonSaveSettings_Callback(hObject, eventdata, handles)
 	% get settingsfile name
 	defaultfile = sprintf('%s_%sSettings.mat', datestr(now, 1), mfilename);
 	[fname, fpath] =	uiputfile(	...
-								defaultfile, ...
+								fullfile(handles.h2.SettingsPath, defaultfile), ...
 								sprintf('Save %s settings file...', mfilename) ...
 							);
 	if fname == 0 % return if user hits CANCEL button
@@ -145,7 +147,8 @@ function buttonSaveSettings_Callback(hObject, eventdata, handles)
 %--------------------------------------------------------------------------
 function buttonLoadSettings_Callback(hObject, eventdata, handles)
     % get file name
-	defaultfile = sprintf('*_%sSettings.mat', mfilename);
+	defaultfile = fullfile(handles.h2.SettingsPath, ...
+										'*_CalibrateSettings.mat');
 	[fname, fpath] =	uigetfile(	...
 								defaultfile, ...
 								sprintf('Load %s settings file...', mfilename) ...
@@ -684,7 +687,9 @@ function editDuration_Callback(hObject, eventdata, handles)
     if checklim(tmp, [handles.h2.cal.Ramp*2+10, 1000]) 
         handles.h2.cal.Duration = tmp;
         % update AcqDuration and SweepPeriod
-        tmplength = handles.h2.cal.Duration + handles.h2.cal.Delay + 10; 
+		  % add 10 ms to duration + delay
+        tmplength = handles.h2.cal.Duration + handles.h2.cal.Delay + 10;
+		  % acq duration will be 50% increase over this
         handles.h2.cal.AcqDuration = ceil(tmplength/50)*50;
         handles.h2.cal.SweepPeriod = handles.h2.cal.AcqDuration + 10;
         update_ui_str(handles.editAcqDuration, handles.h2.cal.AcqDuration);

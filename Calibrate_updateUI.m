@@ -18,6 +18,7 @@
 %
 % 26 Apr 2016 (SJS): reworking for optogen project
 % 	- adding toggle to use or not use FR file
+% 10 Jun 2019 (SJS): added updating of mic sensitivity
 %--------------------------------------------------------------------------
 
 %----------------------------------------------------------
@@ -25,6 +26,8 @@
 %----------------------------------------------------------
 update_ui_str(handles.editGainL, handles.h2.cal.MicGainL_dB);
 update_ui_str(handles.editGainR, handles.h2.cal.MicGainR_dB);
+update_ui_str(handles.editSenseL, handles.h2.cal.MicSenseL);
+update_ui_str(handles.editSenseR, handles.h2.cal.MicSenseR);
 
 %----------------------------------------------------------
 % enable ctrls if UseFR checkbox is selected
